@@ -24,7 +24,6 @@ int main(){
     cout<<"사칙연산을 지원하며, 소괄호를 지원합니다.\n";
     cout<<"표현식 뒤에 '='를 입력하면, 계산결과를 출력하며, 종료를 원할 시, x를 입력하세요.\n";
     try{
-        int i = 1;
         double val = 0;
         while(cin){
             Token t = ts.get();
