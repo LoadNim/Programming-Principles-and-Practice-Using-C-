@@ -17,6 +17,9 @@ class Token_stream{
 }ts;
 
 void Sentence();
+void Article();
+void Noun();
+void Verb();
 
 int main(){
     cout<<"영어 문법 검사기입니다.\n";
@@ -84,6 +87,27 @@ Token Token_stream::get(){
 }
 
 void Sentence(){
+    Verb();
+    if(cin.peek() == 10) throw invalid_argument("문장이 올바르게 종료되지 않았습니다.");
+    Token t = ts.get();
+    if(t.first == 'c') Sentence();
+    else if(t.first == '.') cout<<"올바른 문장입니다.\n";
+    else throw invalid_argument("접속사가 누락되었습니다.\n");
+}
 
-    
+void Verb(){
+    Noun();
+    Token t = ts.get();
+    if(t.first != 'v') throw invalid_argument("동사가 누락되었습니다.");
+}
+
+void Noun(){
+    Article();
+    Token t = ts.get();
+    if(t.first != 'n') throw invalid_argument("명사가 누락되었습니다.");
+}
+
+void Article(){
+    Token t = ts.get();
+    if(t.first != 'a') ts.putback(t);
 }

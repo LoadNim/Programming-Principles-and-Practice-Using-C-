@@ -22,7 +22,7 @@ double expression();
 int main(){
     cout<<"간단한 계산기입니다.\n";
     cout<<"부동소수점 숫자를 이용한 표현식을 입력하세요.\n";\
-    cout<<"사칙연산을 지원하며, 소괄호를 지원합니다.\n";
+    cout<<"사칙연산을 지원하며, 소괄호를 지원하며, 비트 논리 연산을 지원합니다.\n";
     cout<<"표현식 뒤에 '='를 입력하면, 계산결과를 출력하며, 종료를 원할 시, x를 입력하세요.\n";
     try{
         double val = 0;
@@ -60,9 +60,10 @@ Token Token_stream::get(){
 
     cin>>buffer.first;
     switch (buffer.first){
-        case '{': case '}': case '!':
+        case '{': case '}':
         case '=': case 'x': case '(': case ')':
         case '+': case '-': case '*': case '/':
+        case '~': case '&': case '|': case '^':
             return buffer;
 
         case '.':
@@ -75,6 +76,14 @@ Token Token_stream::get(){
             buffer.second = val;
             return buffer;
         }
+        
+        case '!':{
+            char next = cin.peek();
+            if(next == '.' || (next >= '0' && next <= '9')) buffer.first = '1';
+            else buffer.first = '2';
+            return buffer;
+        }
+
         default:
             throw invalid_argument("잘못된 입력 값입니다.");
     }
@@ -127,18 +136,19 @@ double fac(){
     double left = primary();
     Token t = ts.get();
     while(true){
-        if(t.first == '!'){
+        if(t.first == '2'){
             if(left != floor(left)) throw invalid_argument("double형의 계승은 정의되지 않습니다.");
             else if(left == 0){
                 left = 1;
                 t= ts.get();
             }
-            else{
+            else if(left >= 1){
                 double d = 1;
                 for(int i = 1; i <= left; ++i) d *= i;
                 left = d;
                 t = ts.get();
             }
+            else throw invalid_argument("음수의 계승은 정의되지 않습니다.");
         }
         else{
             ts.putback(t);
