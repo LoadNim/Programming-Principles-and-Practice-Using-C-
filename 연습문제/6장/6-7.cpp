@@ -18,6 +18,9 @@ double primary();
 double term();
 double fac();
 double expression();
+double Bit_and();
+double Bit_xor();
+double Bit_or();
 
 int main(){
     cout<<"간단한 계산기입니다.\n";
@@ -32,7 +35,7 @@ int main(){
             else if(t.first == '=') cout<<val<<endl;
             else{
                 ts.putback(t);
-                val = expression();
+                val = Bit_or();
             }
         }
     }
@@ -79,13 +82,73 @@ Token Token_stream::get(){
         
         case '!':{
             char next = cin.peek();
-            if(next == '.' || (next >= '0' && next <= '9')) buffer.first = '1';
+            if(next =='{' || next == '(' || next == '.' || (next >= '0' && next <= '9')) buffer.first = '1';
             else buffer.first = '2';
             return buffer;
         }
 
         default:
             throw invalid_argument("잘못된 입력 값입니다.");
+    }
+}
+
+double Bit_or(){
+    double left = Bit_xor();
+    Token t = ts.get();
+    while (true){
+        switch (t.first){
+            case '|':{
+                double right = Bit_xor();
+                if(left != floor(left)) throw invalid_argument("double형의 or연산은 정의되지 않습니다.");
+                if(right != floor(right)) throw invalid_argument("double형의 or연산은 정의되지 않습니다.");
+                left = (int)left | (int)right;
+                t = ts.get();
+                break;
+            }
+            default:
+                ts.putback(t);
+                return left;
+        }
+    }
+}
+
+double Bit_xor(){
+    double left = Bit_and();
+    Token t = ts.get();
+    while (true){
+        switch (t.first){
+            case '^':{
+                double right = Bit_and();
+                if(left != floor(left)) throw invalid_argument("double형의 xor연산은 정의되지 않습니다.");
+                if(right != floor(right)) throw invalid_argument("double형의 xor연산은 정의되지 않습니다.");
+                left = (int)left ^ (int)right;
+                t = ts.get();
+                break;
+            }
+            default:
+                ts.putback(t);
+                return left;
+        }
+    }
+}
+
+double Bit_and(){
+    double left = expression();
+    Token t = ts.get();
+    while (true){
+        switch (t.first){
+            case '&':{
+                double right = expression();
+                if(left != floor(left)) throw invalid_argument("double형의 and연산은 정의되지 않습니다.");
+                if(right != floor(right)) throw invalid_argument("double형의 and연산은 정의되지 않습니다.");
+                left = (int)left & (int)right;
+                t = ts.get();
+                break;
+            }
+            default:
+                ts.putback(t);
+                return left;
+        }
     }
 }
 
@@ -161,16 +224,25 @@ double primary(){
     Token t = ts.get();
     switch(t.first){
         case '{':{
-            double d = expression();
+            double d = Bit_or();
             t = ts.get();
             if(t.first != '}') throw invalid_argument("'}'가 나와야 함");
             return d;
         }
         case '(':{
-            double d = expression();
+            double d = Bit_or();
             t = ts.get();
             if(t.first != ')') throw invalid_argument("')'가 나와야 함");
             return d;
+        }
+        case '1':{
+            double d = primary();
+            return !d;
+        }
+        case '~':{
+            double d = primary();
+            if(d != floor(d)) throw invalid_argument("double형의 보수 연산은 정의되지 않습니다.");
+            return ~(int)d;
         }
         case '8': return t.second;
         default:
